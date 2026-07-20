@@ -31,13 +31,15 @@ class MakeRPMConfig extends MakeLinuxPackageConfig {
     this.prep,
     this.build,
     this.install,
-    this.postun,
+    List<String>? postinstallScripts,
+    List<String>? postuninstallScripts,
     this.files,
     this.defattr,
     this.attr,
     this.changelog,
     this.specMacros,
-  });
+  })  : _postinstallScripts = postinstallScripts ?? [],
+        _postuninstallScripts = postuninstallScripts ?? [];
 
   factory MakeRPMConfig.fromJson(Map<String, dynamic> json) {
     return MakeRPMConfig(
@@ -66,7 +68,12 @@ class MakeRPMConfig extends MakeLinuxPackageConfig {
       prep: json['prep'] as String?,
       build: json['build'] as String?,
       install: json['install'] as String?,
-      postun: json['postun'] as String?,
+      postinstallScripts: json['postinstall_scripts'] != null
+          ? List.castFrom<dynamic, String>(json['postinstall_scripts'])
+          : null,
+      postuninstallScripts: json['postuninstall_scripts'] != null
+          ? List.castFrom<dynamic, String>(json['postuninstall_scripts'])
+          : (json['postun'] != null ? [json['postun'] as String] : null),
       files: json['files'] as String?,
       defattr: json['defattr'] as String?,
       attr: json['attr'] as String?,
@@ -85,6 +92,8 @@ class MakeRPMConfig extends MakeLinuxPackageConfig {
   List<String>? supportedMimeType;
   List<String>? actions;
   List<String>? categories;
+  List<String> _postinstallScripts;
+  List<String> _postuninstallScripts;
 
   //RPM preamble Spec file fields
   String? summary;
@@ -102,12 +111,21 @@ class MakeRPMConfig extends MakeLinuxPackageConfig {
   String? prep;
   String? build;
   String? install;
-  String? postun;
   String? files;
   String? defattr;
   String? attr;
   String? changelog;
   List<String>? specMacros;
+
+  List<String> get postScripts => [
+    'update-mime-database %{_datadir}/mime &> /dev/null || :',
+    ..._postinstallScripts,
+  ];
+
+  List<String> get postunScripts => [
+    'update-mime-database %{_datadir}/mime &> /dev/null || :',
+    ..._postuninstallScripts,
+  ];
 
   @override
   Map<String, dynamic> toJson() {
@@ -143,10 +161,9 @@ class MakeRPMConfig extends MakeLinuxPackageConfig {
             'cp -r $appBinaryName.desktop %{buildroot}%{_datadir}/applications/$newName.desktop',
             'cp -r $appBinaryName.png %{buildroot}%{_datadir}/pixmaps/$newName.png',
             'cp -r $appBinaryName*.xml %{buildroot}%{_datadir}/metainfo/$newName.appdata.xml || :',
-            'update-mime-database %{_datadir}/mime &> /dev/null || :',
           ].join('\n'),
-          '%postun': ['update-mime-database %{_datadir}/mime &> /dev/null || :']
-              .join('\n'),
+          '%post': postScripts.join('\n'),
+          '%postun': postunScripts.join('\n'),
           '%files': [
             '%{_bindir}/$newName',
             '%{_datadir}/$newName',

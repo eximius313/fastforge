@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_app_packager/src/api/app_package_maker.dart';
 
-class MakeRPMConfig extends MakeConfig {
+class MakeRPMConfig extends MakeLinuxPackageConfig {
   MakeRPMConfig({
     // Desktop file
     required this.displayName,
@@ -30,12 +30,15 @@ class MakeRPMConfig extends MakeConfig {
     this.prep,
     this.build,
     this.install,
-    this.postun,
+    List<String>? postinstallScripts,
+    List<String>? postuninstallScripts,
     this.files,
     this.defattr,
     this.attr,
     this.changelog,
-  });
+    this.specMacros,
+  })  : _postinstallScripts = postinstallScripts ?? [],
+        _postuninstallScripts = postuninstallScripts ?? [];
 
   factory MakeRPMConfig.fromJson(Map<String, dynamic> json) {
     return MakeRPMConfig(
@@ -53,7 +56,7 @@ class MakeRPMConfig extends MakeConfig {
       group: json['group'] as String?,
       vendor: json['vendor'] as String?,
       packager: json['packager'] as String?,
-      packagerEmail: json['packagerEmail'] as String?,
+      packagerEmail: (json['packagerEmail'] ?? json['packager_email']) as String?,
       license: json['license'] as String?,
       url: json['url'] as String?,
       buildArch: json['build_arch'] as String? ?? _getArchitecture(),
@@ -63,11 +66,17 @@ class MakeRPMConfig extends MakeConfig {
       prep: json['prep'] as String?,
       build: json['build'] as String?,
       install: json['install'] as String?,
-      postun: json['postun'] as String?,
+      postinstallScripts: json['postinstall_scripts'] != null
+          ? List.castFrom<dynamic, String>(json['postinstall_scripts'])
+          : null,
+      postuninstallScripts: json['postuninstall_scripts'] != null
+          ? List.castFrom<dynamic, String>(json['postuninstall_scripts'])
+          : (json['postun'] != null ? [json['postun'] as String] : null),
       files: json['files'] as String?,
       defattr: json['defattr'] as String?,
       attr: json['attr'] as String?,
       changelog: json['changelog'] as String?,
+      specMacros: (json['spec_macros'] as List<dynamic>?)?.cast<String>(),
     );
   }
 
@@ -80,6 +89,8 @@ class MakeRPMConfig extends MakeConfig {
   List<String>? supportedMimeType;
   List<String>? actions;
   List<String>? categories;
+  List<String> _postinstallScripts;
+  List<String> _postuninstallScripts;
 
   //RPM preamble Spec file fields
   String? summary;
@@ -97,11 +108,21 @@ class MakeRPMConfig extends MakeConfig {
   String? prep;
   String? build;
   String? install;
-  String? postun;
   String? files;
   String? defattr;
   String? attr;
   String? changelog;
+  List<String>? specMacros;
+
+  List<String> get postScripts => [
+    'update-mime-database %{_datadir}/mime &> /dev/null || :',
+    ..._postinstallScripts,
+  ];
+
+  List<String> get postunScripts => [
+    'update-mime-database %{_datadir}/mime &> /dev/null || :',
+    ..._postuninstallScripts,
+  ];
 
   @override
   Map<String, dynamic> toJson() {
@@ -132,14 +153,14 @@ class MakeRPMConfig extends MakeConfig {
             'mkdir -p %{buildroot}%{_datadir}/metainfo',
             'mkdir -p %{buildroot}%{_datadir}/pixmaps',
             'cp -r %{name}/* %{buildroot}%{_datadir}/%{name}',
-            'ln -s %{_datadir}/%{name}/%{name} %{buildroot}%{_bindir}/%{name}',
-            'cp -r %{name}.desktop %{buildroot}%{_datadir}/applications',
-            'cp -r %{name}.png %{buildroot}%{_datadir}/pixmaps',
-            'cp -r %{name}*.xml %{buildroot}%{_datadir}/metainfo || :',
+            'ln -s %{_datadir}/%{name}/$appBinaryName %{buildroot}%{_bindir}/%{name}',
+            'cp -r $appBinaryName.desktop %{buildroot}%{_datadir}/applications/%{name}.desktop',
+            'cp -r $appBinaryName.png %{buildroot}%{_datadir}/pixmaps/%{name}.png',
+            'cp -r $appBinaryName*.xml %{buildroot}%{_datadir}/metainfo/%{name}.appdata.xml || :',
             'update-mime-database %{_datadir}/mime &> /dev/null || :',
           ].join('\n'),
-          '%postun': ['update-mime-database %{_datadir}/mime &> /dev/null || :']
-              .join('\n'),
+          '%post': postScripts.join('\n'),
+          '%postun': postunScripts.join('\n'),
           '%files': [
             '%{_bindir}/%{name}',
             '%{_datadir}/%{name}',
@@ -154,7 +175,6 @@ class MakeRPMConfig extends MakeConfig {
       },
       'DESKTOP': {
         'Type': 'Application',
-        'Version': appVersion.toString(),
         'Name': displayName,
         'GenericName': genericName,
         'Icon': appName,
@@ -200,9 +220,12 @@ class MakeRPMConfig extends MakeConfig {
             (e) => '${e.key}=${e.value}',
           ),
     ].join('\n');
+    final macrosStr = specMacros != null && specMacros!.isNotEmpty
+        ? '${specMacros!.join('\n')}\n\n'
+        : '';
     final map = {
       'DESKTOP': desktopFile,
-      'SPEC': '$preamble\n\n$body\n\n$inlineBody',
+      'SPEC': '$macrosStr$preamble\n\n$body\n\n$inlineBody',
     };
     return Map.castFrom<String, String?, String, String>(map);
   }

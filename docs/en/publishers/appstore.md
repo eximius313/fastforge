@@ -1,88 +1,40 @@
 # App Store
 
-The appstore target publishes your package artifacts to the [App Store Connect](https://appstoreconnect.apple.com/apps).
+English | [简体中文](../../zh-Hans/publishers/appstore.md)
 
-## Set up environment variables
+The `appstore` target uses macOS `xcrun altool` to upload an IPA or PKG to App Store Connect.
 
-requires some environment variables set up to run correctly,Choose one of the following ways.
+## Requirements
 
-- Username and password
+- macOS and Xcode command-line tools
+- A correctly signed `.ipa` or `.pkg`
+- One of the following authentication methods
 
-Get an app-specific password：[https://support.apple.com/HT204397](https://support.apple.com/HT204397)
+## API Key Authentication
 
-```
-export APPSTORE_USERNAME="Login Username"
-export APPSTORE_PASSWORD="App-specific password"
-```
-
-- API key
-
-App Store Connect API: [https://developer.apple.com/documentation/appstoreconnectapi](https://developer.apple.com/documentation/appstoreconnectapi)
-
-```
-export APPSTORE_APIKEY="API key"
-export APPSTORE_APIISSUER="API issuer"
+```bash
+export APP_STORE_CONNECT_KEY_ID=ABC123DEFG
+export APP_STORE_CONNECT_ISSUER_ID=00000000-0000-0000-0000-000000000000
+export APP_STORE_CONNECT_KEY_PATH="$PWD/AuthKey_ABC123DEFG.p8"
 ```
 
-## Usage
+Compatible variables: `APPSTORE_APIKEY` and `APPSTORE_APIISSUER`. When using an API key, the key ID, issuer ID, and key path must all be present.
 
-Run:
+## Username Authentication
 
-```
-fastforge publish \
-  --path dist/1.0.0+1/hello_world-1.0.0+1-ios.ipa \
-  --targets appstore /
-```
-
-### Configure `distribute_options.yaml`
-
-```yaml
-variables:
-  APPSTORE_USERNAME: 'xxx'
-  APPSTORE_PASSWORD: 'xxx'
-  # or
-  # APPSTORE_APIKEY: "xxx"
-  # APPSTORE_APIISSUER: "xxx"
-output: dist/
-releases:
-  - name: dev
-    jobs:
-      - name: release-dev-ios
-        package:
-          platform: ios
-          target: ipa
-          build_args:
-            target: lib/main.dart
-            export-options-plist: ios/ExportOptions.plist
-        # Publish to appstore
-        publish:
-          target: appstore
+```bash
+export APPSTORE_USERNAME=user@example.com
+export APPSTORE_PASSWORD=app-specific-password
 ```
 
-> **Note**: Make sure your `export-options-plist` has the `method` set to `app-store`. Other export methods like `ad-hoc`, `development`, or `enterprise` will cause the upload to App Store Connect to fail.
+## Upload
 
-Here's an example of an `ExportOptions.plist` file with the correct settings for App Store submission:
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>method</key>
-    <string>app-store</string>
-    <!-- ... other settings ... -->
-</dict>
-</plist>
+```bash
+fastforge publish --path dist/MyApp.ipa --target appstore
 ```
 
-Run:
+Do not pass sensitive credentials through `--publish-arg` or place them in command history.
 
-```
-fastforge release --name dev
-```
+## Subsequent Management
 
-## Related Links
-
-- [Use an app-specific password](https://support.apple.com/HT204397)
-- [App Store Connect api](https://developer.apple.com/documentation/appstoreconnectapi)
-- [altool guide](https://help.apple.com/asc/appsaltool/)
+Completing an upload does not submit the app for review. Use `fastforge appstore` to query builds, associate versions, and create review submissions; see [App Store Connect](../stores/appstore.md).

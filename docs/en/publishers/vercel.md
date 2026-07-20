@@ -1,51 +1,28 @@
 # Vercel
 
-The vercel target publishes your web artifacts to the [vercel.com](https://vercel.com).
+English | [简体中文](../../zh-Hans/publishers/vercel.md)
 
-## Get publishing arguments
+The `vercel` target deploys a directory to Vercel Production and depends on the Vercel CLI installed on the system.
 
-Open [vercel.com](https://vercel.com) And log in
+## Configuration
 
-### Get `org-id`
-
-Open the Account Settings page and find `Your ID`.
-
-### Get `project-id`
-
-Select the project you want to deploy, Open the Project Settings page and find `Project ID`.
-
-## Usage
-
-Run:
-
-```
-fastforge publish \
-  --path dist/1.0.0+1/hello_world-1.0.0+1-web \
-  --targets vercel \
-  --vercel-org-id your-org-id \
-  --vercel-project-id your-project-id
+```bash
+export VERCEL_ORG_ID=team_or_user_id
+export VERCEL_PROJECT_ID=project_id
 ```
 
-### Configure `distribute_options.yaml`
+Make sure the Vercel CLI is signed in, or configure a token through one of its supported methods.
 
-```yaml
-output: dist/
-releases:
-  - name: dev
-    jobs:
-      - name: web-direct
-        package:
-          platform: web
-          target: direct
-        publish:
-          target: vercel
-          args:
-            org-id: your-org-id
-            project-id: your-project-id
+## Publish
+
+```bash
+fastforge publish --path build/web --target vercel
 ```
 
-Run:
+Fastforge generates `.vercel/project.json` in the target directory, then runs:
 
+```text
+vercel --prod
 ```
-fastforge release --name dev
-```
+
+You can override the environment variables with `org-id` and `project-id` publishing arguments.

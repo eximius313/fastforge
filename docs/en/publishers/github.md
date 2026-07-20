@@ -1,58 +1,35 @@
-# GitHub
+# GitHub Releases
 
-The github target publishes your package artifacts to the [github](https://github.com/fastforgedev/fastforge/releases) release.
+English | [简体中文](../../zh-Hans/publishers/github.md)
 
-## Set up environment variables
+The `github` target uploads a file to a GitHub Release and creates the release if it does not exist.
 
-requires some environment variables set up to run correctly.
+## Authentication
 
-```
-# Get token https://docs.github.com/cn/enterprise-server@3.2/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
-
-export GITHUB_TOKEN="your personal access token"
+```bash
+export GITHUB_TOKEN=github-token
 ```
 
-## Usage
+The token needs read and write access to releases in the target repository.
 
-Run:
+## Publish
 
-```
-fastforge publish \
-  --path dist/1.0.0+1/hello_world-1.0.0+1-android.apk \
-  --targets github \
-  --github-repo-owner 'leanflutter' \
-  --github-repo-name 'fastforge'
+```bash
+fastforge publish --path dist/app.zip --target github \
+  --publish-arg repo=owner/repository \
+  --publish-arg release-tag=v1.0.0
 ```
 
-### Configure `distribute_options.yaml`
+In CI, `owner/repository` can be supplied through `GITHUB_REPOSITORY`.
 
-```yaml
-variables:
-  GITHUB_TOKEN: your personal access token, See[https://docs.github.com/cn/enterprise-server@3.2/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token]
-output: dist/
-releases:
-  - name: dev
-    jobs:
-      - name: release-dev-android
-        package:
-          platform: android
-          target: apk
-          build_args:
-            target-platform: android-arm
-        # Publish to github
-        publish:
-          target: github
-          args:
-            repo-owner: Repository owner
-            repo-name: Repository name
-```
+## Arguments
 
-Run:
+| Argument             | Description                                           |
+| -------------------- | ----------------------------------------------------- |
+| `repo`               | `owner/repository`; may also use `GITHUB_REPOSITORY`  |
+| `release-tag`        | Release tag; provide explicitly for direct publishing |
+| `release-title`      | Title for a newly created release                     |
+| `release-draft`      | `true` or `1` creates a draft                         |
+| `release-prerelease` | `true` or `1` creates a prerelease                    |
 
-```
-fastforge release --name dev
-```
-
-## Related Links
-
-- [Creating a personal access token](https://docs.github.com/cn/enterprise-server@3.2/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
+For predictable behavior, always provide `release-tag` explicitly.

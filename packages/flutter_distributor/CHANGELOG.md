@@ -1,3 +1,25 @@
+## 0.6.10
+
+* fix(rpm): enforce usage of `appBinaryName` for assets and fix symlink logic (#313)
+* fix(rpm): rename `packagerEmail` to `packager_email` in JSON config deserialization (#352)
+* bump `unified_distributor` to ^0.2.10
+
+## 0.6.9
+
+* fix(msix): auto-detect architecture from build output directory (#349)
+* fix(linux-pacman): include 'opt/' directory in bsdtar archive (#346)
+* feat: add configurable EXE installer architectures
+* fix: desktop entry version key (#347)
+
+## 0.6.8
+
+* fix: ensure non-zero exit code on packaging/publishing errors (#344)
+* bump `unified_distributor` to ^0.2.8
+
+## 0.6.7
+
+* bump `unified_distributor` to ^0.2.7
+
 ## 0.6.6
 
 * feat: add comprehensive pgyer upload parameters support #297

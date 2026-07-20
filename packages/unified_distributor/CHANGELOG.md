@@ -1,3 +1,21 @@
+## 0.2.10
+
+* bump `flutter_app_packager` to ^0.6.10
+* bump `flutter_app_publisher` to ^0.6.9
+
+## 0.2.9
+
+* bump `flutter_app_packager` to ^0.6.9
+* bump `flutter_app_publisher` to ^0.6.8
+
+## 0.2.8
+
+* fix: improved error handling to catch both Error and Exception types on publishing failures
+
+## 0.2.7
+
+* bump `flutter_app_packager` to ^0.6.7
+
 ## 0.2.6
 
 * feat: add comprehensive pgyer upload parameters support #297

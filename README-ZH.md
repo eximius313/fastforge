@@ -1,4 +1,4 @@
-# fastforge
+# fastforge <sub>原 Flutter Distributor</sub>
 
 [![pub version][pub-image]][pub-url] [![pub downloads][pub-dm-image]][pub-dm-url] [![][discord-image]][discord-url] [![melos](https://img.shields.io/badge/maintained%20with-melos-f700ff.svg?style=flat-square)](https://github.com/invertase/melos) [![All Contributors][all-contributors-image]](#contributors)
 
@@ -10,9 +10,16 @@
 [discord-url]: https://discord.gg/zPa6EZ2jqb
 [all-contributors-image]: https://img.shields.io/github/all-contributors/fastforgedev/fastforge?color=ee8449&style=flat-square
 
-卓越的 [Flutter](https://flutter.dev) 应用打包与发布工具，为您提供一站式解决方案，满足各种分发需求。
+让每一个应用更快抵达用户 — 用一套清晰的配置完成构建、打包与发布。覆盖主流分发格式和应用市场，也能自然融入团队的 CI/CD 流程。
 
-> **更名通知：** ~~Flutter Distributor~~ 已更名为 Fastforge。如果您之前使用的是 ~~Flutter Distributor~~，请注意所有功能保持不变，但包名、命令和文档已更新以反映此变更。
+> [!WARNING]
+> **Rust 迁移进行中：** Fastforge 的核心正在用 [Rust](https://www.rust-lang.org/) 重写，以实现更好的性能、更小的安装体积，以及对 Dart SDK 零运行时依赖。新的实现位于 [`crates/`](./crates) 目录，与现有 Dart 包并行开发。
+>
+> **这对您意味着什么：**
+> - 当前基于 Dart 的 CLI（`dart pub global activate fastforge`）仍然可用，并会持续收到问题修复。
+> - Rust CLI 将以原生二进制文件发布——运行时无需安装 Dart 或 Flutter SDK。
+> - API 和配置格式设计上保持兼容；任何破坏性变更都会提前明确公告。
+> - 非常欢迎对 Rust 实现提交贡献、反馈和问题报告——请参阅[参与贡献](#参与贡献)部分。
 
 ---
 
@@ -22,7 +29,8 @@
 
 ## 文档
 
-完整文档请访问 [fastforge.dev](https://fastforge.dev/zh)。
+- [Fastforge 原生 CLI 文档](docs/zh-Hans/README.md)
+- [旧版 Dart CLI 文档](https://fastforge.dev/zh)
 
 ## 主要特性
 
@@ -60,6 +68,12 @@
 ```bash
 dart pub global activate fastforge
 ```
+
+> **Windows 用户请注意：** 激活后，请确保 pub 缓存 bin 目录已添加到 PATH 环境变量中：
+> 1. 打开 **系统属性** → **高级** → **环境变量**
+> 2. 在 **用户变量** 中找到 `Path`，点击 **编辑**
+> 3. 添加 `%APPDATA%\Pub\Cache\bin` 并点击 **确定**
+> 4. 重启终端，然后运行 `fastforge --help` 验证
 
 ## 快速开始
 
@@ -151,7 +165,7 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
       - name: 安装 Fastforge
         run: dart pub global activate fastforge

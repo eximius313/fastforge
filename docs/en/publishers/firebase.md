@@ -1,76 +1,53 @@
 # Firebase
 
-The firebase target publishes your package artifacts to the [firebase](https://console.firebase.google.com/project/_/appdistribution).
+English | [简体中文](../../zh-Hans/publishers/firebase.md)
 
-## Requirements
+Fastforge provides two Firebase targets, both of which depend on the Firebase CLI installed on the system.
 
-- `Firebase CLI`
+## App Distribution
 
-Run the following command
+Target: `firebase`
 
-```
-npm install -g firebase-tools
-```
+```bash
+export FIREBASE_TOKEN=firebase-token
 
-## Set up environment variables
-
-requires some environment variables set up to run correctly.
-
-```
-# Get token https://firebase.google.com/docs/cli?authuser=0#cli-ci-systems
-firebase login:ci
-
-export FIREBASE_TOKEN="your firebase login:ci Token"
+fastforge publish --path dist/app.apk --target firebase \
+  --publish-arg app=1:1234567890:android:abcdef
 ```
 
-## Usage
+`app` is required. Optional arguments are passed directly to the Firebase CLI:
 
-Run:
+- `release-notes`
+- `release-notes-file`
+- `testers`
+- `testers-file`
+- `groups`
+- `groups-file`
 
-```
-fastforge publish \
-  --path dist/1.0.0+1/hello_world-1.0.0+1-android.apk \
-  --targets firebase \
-  --firebase-app '<app ID>' \
-  --firebase-testers testers@gmail.com \
-  --firebase-groups fastforge \
-  --firebase-release-notes 'release v1.0.0' /
-```
-
-### Configure `distribute_options.yaml`
-
-```yaml
-variables:
-  FIREBASE_TOKEN: your token, See[https://firebase.google.com/docs/cli?authuser=0#cli-ci-systems]
-output: dist/
-releases:
-  - name: dev
-    jobs:
-      - name: release-dev-android
-        package:
-          platform: android
-          target: apk
-          build_args:
-            target-platform: android-arm
-        # Publish to firebase
-        publish:
-          target: firebase
-          args:
-            app: your app ID
-            testers: testers@gmail.com
-            groups: fastforge
-            release-notes: release v1.0.0
+```bash
+fastforge publish --path dist/app.apk --target firebase \
+  --publish-arg app=1:1234567890:android:abcdef \
+  --publish-arg groups=qa-team \
+  --publish-arg 'release-notes=Internal build'
 ```
 
-Run:
+## Firebase Hosting
 
+Target: `firebase-hosting`
+
+`--path` should point to the directory to deploy:
+
+```bash
+export FIREBASE_PROJECT_ID=my-project
+
+fastforge publish --path build/web --target firebase-hosting
 ```
-fastforge release --name dev
+
+You can override the environment variable with the `project-id` argument:
+
+```bash
+fastforge publish --path build/web --target firebase-hosting \
+  --publish-arg project-id=my-project
 ```
 
-## Related Links
-
-- [Install the Firebase CLI](https://firebase.google.com/docs/cli?authuser=0#install_the_firebase_cli)
-- [Use the CLI with CI systems](https://firebase.google.com/docs/cli?authuser=0#cli-ci-systems)
-- [Use Firebase CLI - iOS](https://firebase.google.com/docs/app-distribution/ios/distribute-cli?authuser=0)
-- [Use Firebase CLI - Android](https://firebase.google.com/docs/app-distribution/android/distribute-cli?authuser=0)
+Fastforge generates `.firebaserc` and `firebase.json` in the target directory, then runs `firebase deploy`. The token may be omitted when the Firebase CLI is already signed in; setting `FIREBASE_TOKEN` is recommended in CI.

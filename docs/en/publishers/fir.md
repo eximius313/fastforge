@@ -1,21 +1,28 @@
 # fir.im
 
-The fir target publishes your `.apk` or `.ipa` artifacts to the [fir.im](https://betaqr.com).
+English | [简体中文](../../zh-Hans/publishers/fir.md)
 
-## Set up environment variables
+The `fir` target uploads an Android APK or iOS IPA to fir.im.
 
-requires some environment variables set up to run correctly.
+## Configuration
 
+```bash
+export FIR_API_TOKEN=fir-api-token
 ```
-export FIR_API_TOKEN="your api token"
+
+`bundle_id` is required when publishing:
+
+```bash
+fastforge publish --path dist/app.apk --target fir \
+  --publish-arg bundle_id=com.example.app
 ```
 
-## Usage
+## Optional Arguments
 
-Run:
+| Argument       | Description      |
+| -------------- | ---------------- |
+| `app_name`     | App display name |
+| `version`      | Version name     |
+| `build_number` | Build number     |
 
-```
-fastforge publish \
-  --path dist/1.0.0+1/hello_world-1.0.0+1-android.apk \
-  --targets fir
-```
+The current implementation infers the platform only from the `.apk` or `.ipa` extension.

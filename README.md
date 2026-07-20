@@ -1,4 +1,9 @@
-# fastforge
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./apps/docs/public/brand-lockup.svg">
+  <img alt="Fastforge" src="./apps/docs/public/brand-lockup.svg" width="480">
+</picture>
+
+# Fastforge <sub>formerly Flutter Distributor</sub>
 
 [![pub version][pub-image]][pub-url] [![pub downloads][pub-dm-image]][pub-dm-url] [![][discord-image]][discord-url] [![melos](https://img.shields.io/badge/maintained%20with-melos-f700ff.svg?style=flat-square)](https://github.com/invertase/melos) [![All Contributors][all-contributors-image]](#contributors)
 
@@ -10,9 +15,17 @@
 [discord-url]: https://discord.gg/zPa6EZ2jqb
 [all-contributors-image]: https://img.shields.io/github/all-contributors/fastforgedev/fastforge?color=ee8449&style=flat-square
 
-The ultimate all-in-one [Flutter](https://flutter.dev) application packaging and distribution tool, providing a seamless solution for all your distribution needs.
+Ship every app faster to your users — Build, package, and publish with one clear configuration. Target popular distribution formats and app stores while fitting naturally into your CI/CD pipeline.
 
-> **Name Change Notice:** ~~Flutter Distributor~~ has been renamed to Fastforge. If you were previously using ~~Flutter Distributor~~, please note that all functionality remains the same, but the package name, commands, and documentation have been updated to reflect this change.
+> [!WARNING]
+> **Rust Migration In Progress:** The core of Fastforge is being rewritten in [Rust](https://www.rust-lang.org/) to deliver better performance, a smaller install footprint, and zero runtime dependencies on the Dart SDK. The new implementation lives in the [`crates/`](./crates) directory and is being developed in parallel with the existing Dart packages.
+>
+> **What this means for you:**
+>
+> - The current Dart-based CLI (`dart pub global activate fastforge`) continues to work and receives bug fixes.
+> - The Rust CLI will be released as a native binary — no Dart or Flutter SDK required to run it.
+> - APIs and configuration formats are designed to remain compatible; any breaking changes will be clearly announced.
+> - Contributions, feedback, and bug reports on the Rust implementation are very welcome — see the [Contributing](#contributing) section.
 
 ---
 
@@ -22,7 +35,8 @@ English | [简体中文](./README-ZH.md)
 
 ## Documentation
 
-Complete documentation is available at [fastforge.dev](https://fastforge.dev/).
+- [Native Fastforge CLI documentation](docs/en/README.md)
+- [Legacy Dart CLI documentation](https://fastforge.dev/)
 
 ## Key Features
 
@@ -33,26 +47,26 @@ Complete documentation is available at [fastforge.dev](https://fastforge.dev/).
 
 ### Supported Package Formats
 
-- **Android**: [AAB](https://fastforge.dev/en/makers/aab), [APK](https://fastforge.dev/en/makers/apk)
-- **iOS**: [IPA](https://fastforge.dev/en/makers/ipa)
-- **OpenHarmony**: [HAP](https://fastforge.dev/en/makers/hap), [APP](https://fastforge.dev/en/makers/app)
-- **Linux**: [AppImage](https://fastforge.dev/en/makers/appimage), [DEB](https://fastforge.dev/en/makers/deb), [RPM](https://fastforge.dev/en/makers/rpm), Pacman
-- **macOS**: [DMG](https://fastforge.dev/en/makers/dmg), [PKG](https://fastforge.dev/en/makers/pkg)
-- **Windows**: [EXE](https://fastforge.dev/en/makers/exe), [MSIX](https://fastforge.dev/en/makers/msix)
-- **Universal**: [ZIP](https://fastforge.dev/en/makers/zip)
+- **Android**: [AAB](https://fastforge.dev/makers/aab), [APK](https://fastforge.dev/makers/apk)
+- **iOS**: [IPA](https://fastforge.dev/makers/ipa)
+- **OpenHarmony**: [HAP](https://fastforge.dev/makers/hap), [APP](https://fastforge.dev/makers/app)
+- **Linux**: [AppImage](https://fastforge.dev/makers/appimage), [DEB](https://fastforge.dev/makers/deb), [RPM](https://fastforge.dev/makers/rpm), Pacman
+- **macOS**: [DMG](https://fastforge.dev/makers/dmg), [PKG](https://fastforge.dev/makers/pkg)
+- **Windows**: [EXE](https://fastforge.dev/makers/exe), [MSIX](https://fastforge.dev/makers/msix)
+- **Universal**: [ZIP](https://fastforge.dev/makers/zip)
 - More formats coming soon...
 
 ### Supported Distribution Platforms
 
-- [App Store](https://fastforge.dev/en/publishers/appstore)
-- [Firebase](https://fastforge.dev/en/publishers/firebase)
-- [Firebase Hosting](https://fastforge.dev/en/publishers/firebase-hosting)
-- [FIR](https://fastforge.dev/en/publishers/fir)
-- [GitHub Releases](https://fastforge.dev/en/publishers/github)
-- [PGYER](https://fastforge.dev/en/publishers/pgyer)
-- [Play Store](https://fastforge.dev/en/publishers/playstore)
-- [Qiniu](https://fastforge.dev/en/publishers/qiniu)
-- [Vercel](https://fastforge.dev/en/publishers/vercel)
+- [App Store](https://fastforge.dev/publishers/appstore)
+- [Firebase](https://fastforge.dev/publishers/firebase)
+- [Firebase Hosting](https://fastforge.dev/publishers/firebase-hosting)
+- [FIR](https://fastforge.dev/publishers/fir)
+- [GitHub Releases](https://fastforge.dev/publishers/github)
+- [PGYER](https://fastforge.dev/publishers/pgyer)
+- [Play Store](https://fastforge.dev/publishers/playstore)
+- [Qiniu](https://fastforge.dev/publishers/qiniu)
+- [Vercel](https://fastforge.dev/publishers/vercel)
 - More platforms coming soon...
 
 ## Installation
@@ -60,6 +74,13 @@ Complete documentation is available at [fastforge.dev](https://fastforge.dev/).
 ```bash
 dart pub global activate fastforge
 ```
+
+> **Windows users:** After activation, ensure the pub cache bin directory is in your PATH:
+>
+> 1. Open **System Properties** → **Advanced** → **Environment Variables**
+> 2. Under **User variables**, select `Path` → **Edit**
+> 3. Add `%APPDATA%\Pub\Cache\bin` and click **OK**
+> 4. Restart your terminal, then try `fastforge --help`
 
 ## Quick Start
 
@@ -151,7 +172,7 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
       - name: Install Fastforge
         run: dart pub global activate fastforge
@@ -225,7 +246,7 @@ Please make sure to update tests as appropriate and follow the existing code sty
     <tr>
       <td align="center" size="13px" colspan="7">
         <img src="https://raw.githubusercontent.com/all-contributors/all-contributors-cli/1b8533af435da9854653492b1327a23a4dbd0a10/assets/logo-small.svg">
-          <a href="https://all-contributors.js.org/docs/en/bot/usage">Add your contributions</a>
+          <a href="https://all-contributors.js.org/docs/bot/usage">Add your contributions</a>
         </img>
       </td>
     </tr>

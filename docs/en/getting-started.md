@@ -1,169 +1,69 @@
 # Getting Started
 
-Fastforge is an all-in-one Flutter application packaging and distribution tool, providing you with a one-stop solution to meet various distribution needs.
+English | [简体中文](../zh-Hans/getting-started.md)
 
-> **Name Change Notice:** ~~Flutter Distributor~~ has been renamed to Fastforge. If you were previously using ~~Flutter Distributor~~, please note that all functionality remains the same, but the package name, commands, and documentation have been updated to reflect this change.
+This page starts with installation verification and introduces Fastforge entry points for packaging, publishing, and artifact analysis. Platform-specific details are covered in the corresponding packager documentation.
 
-<div style="display: flex; flex-direction: row; gap: 10px;">
-  <a href="https://github.com/fastforgedev/fastforge">
-    <img
-      alt="Fastforge on GitHub"
-      src="https://img.shields.io/github/stars/fastforgedev/fastforge?style=for-the-badge&logo=GitHub"
-    />
-  </a>
-  <a href="https://pub.dev/packages/fastforge">
-    <img alt="Pub Likes" src="https://img.shields.io/pub/likes/fastforge?style=for-the-badge&logo=flutter&label=Pub%20Likes"/>
-  </a>
-  <a href="https://github.com/fastforgedev/fastforge/graphs/contributors">
-    <img src="https://img.shields.io/github/all-contributors/fastforgedev/fastforge?style=for-the-badge" />
-  </a>
-</div>
+## 1. Check the Environment
 
-## Key Features
-
-- 🚀 One-Click Build: Support for Android APK/AAB, iOS IPA, OpenHarmony HAP/APP and more
-- 📦 Multi-Platform Release: Support for App Store, App Gallery, Google Play, Firebase, Pgyer, fir.im, etc.
-- 🔄 CI/CD Integration: Perfect integration with GitHub Actions, GitLab CI, and more
-- 🛠 Flexible Configuration: Support for multiple environments, flavors, and custom build arguments
-
-## Installation
-
-```
-dart pub global activate fastforge
+```bash
+fastforge --version
+fastforge --help
 ```
 
-## Usage
+Run commands from the project root, and install the SDKs, build tools, and signing tools required by the target platform in advance.
 
-Add `distribute_options.yaml` to your project root directory.
+## 2. Choose a Platform and Format
 
-```yaml
-output: dist/
+`package` builds the platform project and prepares a distributable artifact. Availability depends on the project type.
+
+Native Gradle Android projects can package APK or AAB artifacts directly:
+
+```bash
+fastforge package --platform android --target apk
+fastforge package --platform android --target aab
 ```
 
-### Configure A Publisher
+Flutter projects currently support only macOS packaging formats:
 
-Let's take `pgyer` as an example, after logging in, click the user avatar on the right side to go to the [API information](https://www.pgyer.com/account/api) page from the menu, copy the `API Key` and add it to the env node.
-
-```yaml
-variables:
-  PGYER_API_KEY: 'your api key'
+```bash
+fastforge package --platform macos --target dmg
 ```
 
-Check out the [Publishers](/publishers/appstore) documentation for all possible publishers and how to configure them.
+For Android, iOS, and other Flutter targets, generate the artifact separately with `fastforge build`; see [Building](building.md). iOS and macOS Xcode projects must pass project parameters through a workflow; see [Xcode Builder](builders/xcode.md). Before running a command, review the [builder overview](builders/README.md) and [packager overview](packagers/README.md) to confirm current coverage.
 
-### Configure Release Items
+## 3. Publish an Existing Artifact
 
-The following example shows how to add a release that contains package `apk`, `ipa` and publish to `pgyer.com`, A `release` can include multiple jobs.
-
-> The `build_args` are the args supported by the `flutter build` command, please modify it according to your project.
-
-```yaml
-releases:
-  - name: dev
-    jobs:
-      # Build and publish your apk pkg to pgyer
-      - name: release-dev-android
-        package:
-          platform: android
-          target: apk
-          build_args:
-            flavor: dev
-            target-platform: android-arm,android-arm64
-            dart-define:
-              APP_ENV: dev
-        publish_to: pgyer
-      # Build and publish your ipa pkg to pgyer
-      - name: release-dev-ios
-        package:
-          platform: ios
-          target: ipa
-          build_args:
-            flavor: dev
-            export-options-plist: ios/dev_ExportOptions.plist
-            dart-define:
-              APP_ENV: dev
-        publish_to: pgyer
+```bash
+fastforge publish \
+  --path dist/app.apk \
+  --target fir
 ```
 
-### Full Example Configuration
+See the [publisher overview](publishers/README.md) for publishing parameters and credentials. If you already have an artifact, you can skip packaging and publish or analyze it directly.
 
-```yaml
-variables:
-  PGYER_API_KEY: 'your api key'
-output: dist/
-releases:
-  - name: dev
-    jobs:
-      # Build and publish your apk pkg to pgyer
-      - name: release-dev-android
-        package:
-          platform: android
-          target: apk
-          build_args:
-            flavor: dev
-            target-platform: android-arm,android-arm64
-            dart-define:
-              APP_ENV: dev
-        publish_to: pgyer
-      # Build and publish your ipa pkg to pgyer
-      - name: release-dev-ios
-        package:
-          platform: ios
-          target: ipa
-          build_args:
-            flavor: dev
-            export-options-plist: ios/dev_ExportOptions.plist
-            dart-define:
-              APP_ENV: dev
-        publish_to: pgyer
+## 4. Analyze an Artifact
+
+`analyze` selects an analyzer based on the file extension and writes JSON to standard output:
+
+```bash
+fastforge analyze dist/app.apk
 ```
 
-### Release Your App
+Write the result to a file:
 
-```
-fastforge release --name dev
-```
-
-## Examples
-
-Fastforge includes several example projects to help you get started:
-
-- **[hello_world](https://github.com/fastforgedev/fastforge/tree/main/examples/hello_world)** - Basic example demonstrating the core functionality.
-- **[multiple_flavors](https://github.com/fastforgedev/fastforge/tree/main/examples/multiple_flavors)** - Example showing how to configure multiple application flavors.
-- **[custom_binary_name](https://github.com/fastforgedev/fastforge/tree/main/examples/custom_binary_name)** - Example of how to customize binary output names.
-
-## Advanced Usage
-
-### Environment Variables
-
-Fastforge supports using environment variables in your configuration files. This is useful for sensitive information like API keys:
-
-```yaml
-variables:
-  API_KEY: ${PGYER_API_KEY} # Uses the PGYER_API_KEY environment variable
+```bash
+fastforge analyze dist/app.apk \
+  --output analysis.json
 ```
 
-### CI/CD Integration
+Supported inputs are `.apk`, `.aab`, `.ipa`, `.dmg`, and macOS `.app` bundles. DMG and `.app` analysis are available only on macOS.
 
-Fastforge works well in CI/CD environments. For example, with GitHub Actions:
+## Next Steps
 
-```yaml
-jobs:
-  build-and-release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: subosito/flutter-action@v2
-      - name: Install Fastforge
-        run: dart pub global activate fastforge
-      - name: Build and release
-        run: fastforge release --name production
-        env:
-          API_KEY: ${{ secrets.API_KEY }}
-```
-
-Check the [documentation](https://fastforge.dev/) for more detailed CI/CD integration examples.
-
-## Thank You
-
-🎉 🎉 🎉
+- Run a build separately: [Building](building.md)
+- Create an installer or package: [Packaging](packaging.md)
+- Upload an existing artifact: [Publishing](publishing.md)
+- Run automation tasks: [Local Workflows](workflows.md)
+- Analyze app artifacts: [App Package Analysis](tools/analyze.md)
+- Manage store metadata: [Store Management](stores/README.md)

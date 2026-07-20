@@ -1,3 +1,33 @@
+## 0.6.10
+
+* fix(rpm): enforce usage of `appBinaryName` for assets and fix symlink logic (#313)
+* fix(rpm): rename `packagerEmail` to `packager_email` in JSON config deserialization (#352)
+
+## 0.6.9
+
+* fix(msix): auto-detect architecture from build output directory (#349)
+* fix(linux-pacman): include 'opt/' directory in bsdtar archive (#346)
+* feat: add configurable EXE installer architectures
+* fix: desktop entry version key (#347)
+* chore: update custom and pkg app package makers
+
+## 0.6.8
+
+* fix(macos): edit pkg PackageInfo in-place to simplify component metadata handling
+* fix(macos): handle productsign errors with proper error reporting
+* fix: add error handling for pkgutil (expand/flatten) and productsign commands
+
+## 0.6.7
+
+* feat: add custom packager support
+* feat: add prepackage/postpackage hooks support (#342)
+* fix: skip running ldd on directories in AppImage packager
+* feat: support custom Inno Setup installation path via `INNO_SETUP_PATH` env var
+* feat(Inno Setup): support extra environment variables and locale filtering
+* fix(macos): use `--component` flag for productbuild and add scripts support
+* refactor: install Linux app files under `/opt` instead of `/usr/share`
+* feat(rpm): add support for RPM spec macros configuration
+
 ## 0.6.5
 
 * MakeDebConfig Add StartupWMClass support #290
